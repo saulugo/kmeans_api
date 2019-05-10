@@ -1,0 +1,8 @@
+{
+"author": "Saúl Lugo, <saul.lugo@diagroup.com>",
+"cluster_variables": ["Sepal.Length","Sepal.Width","Petal.Length", "Petal.Width"],
+"k": [1,20],
+"nstart": 20,
+"seed": 1234,
+"data_filepath": "iris.csv"
+}

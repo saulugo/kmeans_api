@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+#Objective
+The objective of this notebook, is to ilustrate **K-means** clustering method using the famous [iris dataset](https://archive.ics.uci.edu/ml/datasets/iris) 
+
+#Exploring the data
+
+##Getting the data
+```{r}
+library(datasets)
+data <- iris
+head(data)
+summary(data)
+
+```
+
+##Data visualization
+
+The idea is to run a cluster analysis on this data using only 2 of its 3 features. The ultimate goal is to ilustrate that eventhough one could have many features in a dataset, the features selection is very important in order to find data subgroups that makes sense in the domain of business we are working.
+
+So, let's plot several combinations of groups of 2 features in order to see if there is any visual difference in the discriminatory power of each par of features:
+
+```{r}
+library(ggplot2)
+p_setal.l.setal.w <- ggplot(data, aes(Sepal.Length, Sepal.Width, color = Species )) + geom_point() + ggtitle(("Data subgroups vs Sepal Length & Sepal Witdh"))
+p_setal.l.setal.w
+
+```
+
+So, we can see that eventhough the setosa species in grouped and very clear, there is a lot of confusion between the species versicolor and virginica.
+
+```{r}
+library(ggplot2)
+p_petal.l.petal.w <- ggplot(data, aes(Petal.Length, Petal.Width, color = Species )) + geom_point() + ggtitle(("Data subgroups vs Petal Length & Petal Witdh"))
+p_petal.l.petal.w
+
+```
+
+We can see that the species are better described by the Petal characteristics than for the Sepal characteristics.
+
+#Clustering Analysis
+
+For further confirmation of the importance of the features selection, let's run two cluster analysis, one using the Sepal features and another using the Petal features. We will use **K-Means** clustering method.
+
+```{r}
+set.seed(1234)
+
+cluster_sepalfeatures <- kmeans(data[,c("Sepal.Length","Sepal.Width")],3,nstart = 20)
+cluster_sepalfeatures
+
+cluster_sepalfeatures$tot.withinss
+table(cluster_sepalfeatures$cluster,data$Species)
+
+cluster_petalfeatures <- kmeans(data[,c("Petal.Length","Petal.Width")],3,nstart = 20)
+cluster_petalfeatures
+
+cluster_petalfeatures$tot.withinss
+table(cluster_petalfeatures$cluster,data$Species)
+```
+
+From the clustering analysis results, we can see that the analysis performed using the Petal features has a lower within-cluster sum of squares (withinss) than that of using the Sepal features.
+
+Also we can see that in both analysis the setosa species is correctly grouped, but the analysis with the Petal features makes less mistakes classifying the versicolor and the virginica species.
+
+##Visualizing the clustering analysis
+
+Let's make a plot of both analysis, colring the observations by its cluster label:
+
+```{r}
+sepalfeatures_labels <- as.factor(cluster_sepalfeatures$cluster)
+petalfeatures_labels <- as.factor(cluster_petalfeatures$cluster)
+
+p_sepalfeatures_labels <- ggplot(data, aes(Sepal.Length, Sepal.Width, color = sepalfeatures_labels)) + geom_point() + ggtitle("Cluster Analysis by the Sepal Features")
+p_sepalfeatures_labels
+
+p_petalfeatures_labels <- ggplot(data, aes(Petal.Length, Petal.Width, color = petalfeatures_labels)) + geom_point() + ggtitle("Cluster Analysis by the Petal Features")
+p_petalfeatures_labels
+```

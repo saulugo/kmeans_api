@@ -1,0 +1,10 @@
+#start the server
+plumber::plumb("cluster_api.R")$run(port = 5762)
+
+#call the api from the command line
+curl -X POST -H "Content-Type: application/json" -d cluster_config.json http://localhost:5762/kmeans
+curl -X POST -H "Content-Type: application/json" -d cluster_config.json http://localhost:5762/v0/kmeans_best_k > plot.png
+
+#open an image from the command line
+eog plot.png
+

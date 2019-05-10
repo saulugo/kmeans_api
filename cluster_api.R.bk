@@ -1,0 +1,43 @@
+library(plumber)
+library(jsonlite)
+
+#Auxiliary functions
+
+#* Cluster Analysis using K-Means. The user provides: the data in a csv file, k as the number of clusters
+#* The endpoint returns a csv file with the original data plus a column with the cluster label and the cluster statistics
+#* @parm filepath The file with the data
+#* @parm k The number of clusters desired
+#* @parm seed The random seed for reproducibility
+#* @post /kmeans
+
+function(req,res){
+  #reading cluster analysis paramethers from config file
+  cluster_config <- fromJSON(req$postBody)
+  seed <- cluster_config$seed
+  k <- cluster_config$k
+  nstart <- cluster_config$nstart
+  cluster_variables <- cluster_config$cluster_variables
+  filepath <- cluster_config$data_filepath
+  
+  #reading data
+  set.seed(as.numeric(seed))
+  data <- read.csv(filepath)
+  data_features <- names(data)
+  
+  #selecting features. From the data DF selecting only the columns specified by the user in the config file
+  features <- data[data_features %in% cluster_variables]
+  
+  #training the model
+  cluster <- kmeans(features,as.numeric(k),nstart=as.numeric(nstart))
+  
+  #adding the cluster labels information to the data
+  data$cluster_label <- cluster$cluster
+  
+  #writting output file with clusters information
+  write.csv(data,file = "data_clustered.csv",row.names = FALSE)
+  
+  #sending the output data back to the user
+  include_file("data_clustered.csv",res)
+}
+
+
